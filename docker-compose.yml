@@ -50,6 +50,62 @@ services:
     entrypoint: ["/bin/sh", "-c"]
     command: ["mc alias set myminio http://minio:9000 kvqminio kvqminiodev && mc mb myminio/kvq-bucket --ignore-existing"]
 
+  api-server:
+    build:
+      context: ../api-server
+      dockerfile: docker/api-server.Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    environment:
+      KVQ_DSN: postgres://kvq:kvqdev@postgres:5432/kvqtool?sslmode=disable
+      KVQ_VALKEY_URL: valkey:6379
+      KVQ_S3_ENDPOINT: http://minio:9000
+      KVQ_S3_BUCKET: kvq-bucket
+      KVQ_S3_ACCESS_KEY: kvqminio
+      KVQ_S3_SECRET_KEY: kvqminiodev
+      KVQ_ENV: development
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/healthz"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  worker-node:
+    build:
+      context: ../worker-node
+      dockerfile: docker/worker-node.Dockerfile
+    depends_on:
+      api-server:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    environment:
+      KVQ_DSN: postgres://kvq:kvqdev@postgres:5432/kvqtool?sslmode=disable
+      KVQ_VALKEY_URL: valkey:6379
+      KVQ_S3_ENDPOINT: http://minio:9000
+      KVQ_S3_BUCKET: kvq-bucket
+      KVQ_S3_ACCESS_KEY: kvqminio
+      KVQ_S3_SECRET_KEY: kvqminiodev
+      KVQ_ENV: development
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: docker/frontend.Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - api-server
+
 volumes:
   pgdata:
   miniodata:
