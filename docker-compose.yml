@@ -138,6 +138,7 @@ services:
       KVQ_S3_SECRET_KEY: ${S3_SECRET_KEY:-kvqminiodev}
       KVQ_S3_REGION: ${S3_REGION:-us-east-1}
       KVQ_TEMP_DIR: /tmp/kvqtool
+      KVQ_API_URL: http://api-server:8080
       KVQ_LOG_LEVEL: ${LOG_LEVEL:-debug}
 
   ml-inference-node:
