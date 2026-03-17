@@ -40,11 +40,10 @@ services:
       POSTGRES_USER: temporal
       POSTGRES_PWD: temporal
       POSTGRES_SEEDS: temporal-db
-      DYNAMIC_CONFIG_FILE_PATH: config/dynamicconfig/development-sql.yaml
     ports:
       - "${TEMPORAL_PORT:-7233}:7233"
     healthcheck:
-      test: ["CMD", "tctl", "--address", "temporal:7233", "cluster", "health"]
+      test: ["CMD-SHELL", "temporal operator cluster health --address temporal:7233 || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 20
