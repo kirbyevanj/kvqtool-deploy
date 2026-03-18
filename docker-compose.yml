@@ -139,18 +139,8 @@ services:
       KVQ_S3_REGION: ${S3_REGION:-us-east-1}
       KVQ_TEMP_DIR: /tmp/kvqtool
       KVQ_API_URL: http://api-server:8080
+      KVQ_TRANSNET_MODEL_PATH: /models/transnetv2.onnx
       KVQ_LOG_LEVEL: ${LOG_LEVEL:-debug}
-
-  ml-inference-node:
-    build:
-      context: ../ml-inference-node
-      dockerfile: Dockerfile
-    ports:
-      - "${GRPC_PORT:-50051}:50051"
-    environment:
-      TRANSNETV2_MODEL_PATH: /models/transnetv2.onnx
-      GRPC_PORT: "50051"
-      LOG_LEVEL: ${LOG_LEVEL:-INFO}
     volumes:
       - models:/models
 
